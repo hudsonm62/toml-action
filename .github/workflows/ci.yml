@@ -1,0 +1,111 @@
+name: CI
+
+on: push
+
+env:
+  TEST_DIR: .github/tests
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⚙️ Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: "npm"
+
+      - name: ⚙️ Install Dependencies
+        run: npm ci
+
+      - name: 🔀 Copy Current for Comparison
+        run: cp "dist/index.js" "tests/index.js" && cp "dist/licenses.txt" "tests/licenses.txt"
+
+      - name: ⚙️ Clear Dist
+        run: npm run clean
+
+      - name: 📦 Compile w/ NCC
+        run: npm run build
+
+      - name: 🔃 Confirm index.js has been updated
+        uses: hudsonm62/compare-action@v1
+        with:
+          path1: dist/index.js # current from build
+          path2: tests/index.js # live in repo
+          error_same: false
+          ignore_line_ending: true
+          ignore_empty_lines: true
+
+      - name: 🔃 Confirm LICENSES.txt has been updated
+        uses: hudsonm62/compare-action@v1
+        with:
+          path1: dist/LICENSES.txt # current from build
+          path2: tests/LICENSES.txt # live in repo
+          error_same: false
+          ignore_line_ending: true
+          ignore_empty_lines: true
+
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⚙️ Checkout Repo
+        uses: actions/checkout@v6
+
+      - name: Reads a field from a file1.toml
+        uses: ./
+        with:
+          file: ${{ env.TEST_DIR }}/file1.toml
+          field: package.name
+        id: test1
+
+      - name: ✅ Assert test1
+        shell: pwsh
+        run: |
+          if ("${{ steps.test1.outputs.value }}" -ne "myapp") {
+            throw "Expected 'myapp' but got '${{ steps.test1.outputs.value }}'"
+          }
+
+      - name: Reads a field from a file2.toml
+        uses: ./
+        with:
+          file: ${{ env.TEST_DIR }}/file2.toml
+          field: version
+        id: test2
+
+      - name: ✅ Assert test2
+        shell: pwsh
+        run: |
+          if ("${{ steps.test2.outputs.value }}" -ne "1.2.3") {
+            throw "Expected '1.2.3' but got '${{ steps.test2.outputs.value }}'"
+          }
+
+      - name: Reads a nested field from file3.toml
+        uses: ./
+        with:
+          file: ${{ env.TEST_DIR }}/file3.toml
+          field: package.meta.name
+        id: test3-1
+
+      - name: ✅ Assert test3-1
+        shell: pwsh
+        run: |
+          if ("${{ steps.test3-1.outputs.value }}" -ne "myapp") {
+            throw "Expected 'myapp' but got '${{ steps.test3-1.outputs.value }}'"
+          }
+
+      - name: Reads another nested field from file3.toml
+        uses: ./
+        with:
+          file: ${{ env.TEST_DIR }}/file3.toml
+          field: package2.meta.name
+        id: test3-2
+
+      - name: ✅ Assert test3-2
+        shell: pwsh
+        run: |
+          if ("${{ steps.test3-2.outputs.value }}" -ne "myapp2") {
+            throw "Expected 'myapp2' but got '${{ steps.test3-2.outputs.value }}'"
+          }

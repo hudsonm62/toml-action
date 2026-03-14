@@ -1,0 +1,17 @@
+[package]
+[package.meta]
+name = "myapp"
+version = "1.2.3"
+
+[package.dependencies]
+dependent1 = "1.2.3"
+dependent2 = "4.5.6"
+
+[package2]
+[package2.meta]
+name = "myapp2"
+version = "1.2.3"
+
+[package2.dependencies]
+dependent1 = "1.2.3"
+dependent2 = "4.5.6"
