@@ -24,9 +24,9 @@ jobs:
       - name: 🔀 Copy Current for Comparison
         shell: pwsh
         run: |
-          mkdir 'temp' -force
-          Copy-Item -Path "dist/index.js" -Destination "temp/index.js" -Force
-          Copy-Item -Path "dist/LICENSES.txt" -Destination "temp/LICENSES.txt" -Force
+          New-Item -ItemType Directory -Path './temp' -Force
+          Copy-Item -Path "./dist/index.js" -Destination "./temp/index.js" -Force
+          Copy-Item -Path "./dist/LICENSES.txt" -Destination "./temp/LICENSES.txt" -Force
 
       - name: ⚙️ Clear Dist
         run: npm run clean
@@ -38,7 +38,7 @@ jobs:
         uses: hudsonm62/compare-action@v1
         with:
           path1: dist/index.js # current from build
-          path2: tests/index.js # live in repo
+          path2: temp/index.js # live in repo
           error_same: false
           ignore_line_ending: true
           ignore_empty_lines: true
@@ -47,7 +47,7 @@ jobs:
         uses: hudsonm62/compare-action@v1
         with:
           path1: dist/LICENSES.txt # current from build
-          path2: tests/LICENSES.txt # live in repo
+          path2: temp/LICENSES.txt # live in repo
           error_same: false
           ignore_line_ending: true
           ignore_empty_lines: true
