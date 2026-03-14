@@ -22,7 +22,11 @@ jobs:
         run: npm ci
 
       - name: 🔀 Copy Current for Comparison
-        run: cp "dist/index.js" "tests/index.js" && cp "dist/licenses.txt" "tests/licenses.txt"
+        shell: pwsh
+        run: |
+          mkdir 'temp' -force
+          Copy-Item -Path "dist/index.js" -Destination "temp/index.js" -Force
+          Copy-Item -Path "dist/LICENSES.txt" -Destination "temp/LICENSES.txt" -Force
 
       - name: ⚙️ Clear Dist
         run: npm run clean
