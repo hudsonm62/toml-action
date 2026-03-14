@@ -1,4 +1,4 @@
-name: CI
+name: 🧪 CI
 
 on: push
 
@@ -109,3 +109,25 @@ jobs:
           if ("${{ steps.test3-2.outputs.value }}" -ne "myapp2") {
             throw "Expected 'myapp2' but got '${{ steps.test3-2.outputs.value }}'"
           }
+
+      - name: Shouldn not fail on missing field when fail-missing-field is false
+        uses: ./
+        with:
+          file: ${{ env.TEST_DIR }}/file1.toml
+          field: field.not.here
+          fail-missing-field: false
+        id: test4
+
+      - name: Should fail on missing field when fail-missing-field is true
+        continue-on-error: true
+        uses: ./
+        with:
+          file: ${{ env.TEST_DIR }}/file1.toml
+          field: field.not.here
+          fail-missing-field: true
+        id: test5
+
+      - name: ✅ Assert test4 didn't fail
+        if: steps.test4.outcome == 'failure'
+        shell: pwsh
+        run: throw "Expected step 'test4' to succeed but it failed"
