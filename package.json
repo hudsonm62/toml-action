@@ -1,16 +1,12 @@
 {
     "name": "toml-action",
-    "version": "1.0.1",
-    "description": "",
+    "version": "1.0.0",
     "main": "dist/index.js",
     "scripts": {
         "clean": "rimraf ./dist",
         "build": "npx ncc build ./index.js --license LICENSES.txt --minify",
         "format": "prettier --write ."
     },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
     "dependencies": {
         "@actions/core": "^1.10.1",
         "@iarna/toml": "^2.2.5"

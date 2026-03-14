@@ -6,10 +6,6 @@ on:
       ref:
         required: true
         default: "main"
-      version:
-        description: "Version (no `v`)"
-        required: true
-        default: 0.0.0
 
 jobs:
   release:
@@ -21,16 +17,25 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
+
+      - name: ⚙️ Get version from package.json
+        shell: pwsh
+        id: get_version
+        run: |
+          $packageJson = Get-Content -Raw -Path "./package.json" | ConvertFrom-Json
+          Write-Information "Version: $($packageJson.version)" -InformationAction Continue
+          echo "version=$($packageJson.version)" >> $env:GITHUB_OUTPUT
+
       - name: 🤖 Login as GitHub Actions Bot
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: 📰 Create Release for v${{ inputs.version }}
+      - name: 📰 Create Release for v${{ steps.get_version.outputs.version }}
         uses: actions/github-script@v8
         env:
           INPUT_REF: ${{ inputs.ref }}
-          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_VERSION: ${{ steps.get_version.outputs.version }}
         with:
           script: |
             await github.rest.repos.createRelease({
@@ -43,7 +48,7 @@ jobs:
         # https://github.com/actions/toolkit/blob/main/docs/action-versioning.md
       - name: 📎 Bind Major Version Tag
         env:
-          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_VERSION: ${{ steps.get_version.outputs.version }}
         run: |
           MAJOR_INPUT_VERSION="${INPUT_VERSION%%.*}"
           MAJOR_VERSION_TAG="v${MAJOR_INPUT_VERSION}"
