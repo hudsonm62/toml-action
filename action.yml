@@ -10,6 +10,10 @@ inputs:
   field:
     description: "The field inside the TOML file to read"
     required: true
+  fail-missing-field:
+    description: "Whether to fail if the field is missing/null (default: true)"
+    required: false
+    default: "true"
 outputs:
   value:
     description: "The data stored in `field` inside `file`"
